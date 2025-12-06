@@ -1,0 +1,16 @@
+# Configuration for users experiencing one-liner issues
+# Copy these values to replace the configuration in multilanguage typer.py (lines 20-24)
+
+# For slower systems or browsers that need more time:
+TYPING_SPEED_MIN = 0.05
+TYPING_SPEED_MAX = 0.15
+LINE_BREAK_DELAY = 0.25      # Increased from 0.15
+INDENT_DELAY = 0.05
+AUTO_INDENT_WAIT = 0.30      # Increased from 0.15
+
+# Instructions:
+# 1. Open multilanguage typer.py
+# 2. Find the Configuration section (around line 20)
+# 3. Replace the values with these numbers
+# 4. Save and run again
+

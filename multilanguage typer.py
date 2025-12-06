@@ -19,8 +19,9 @@ pyautogui.PAUSE = 0.01
 # Configuration
 TYPING_SPEED_MIN = 0.05  # Minimum delay between characters (seconds)
 TYPING_SPEED_MAX = 0.15  # Maximum delay between characters (seconds)
-LINE_BREAK_DELAY = 0.1   # Additional delay for line breaks
+LINE_BREAK_DELAY = 0.15  # Additional delay for line breaks (increased for reliability)
 INDENT_DELAY = 0.05      # Delay for indentation
+AUTO_INDENT_WAIT = 0.15  # Wait time for LeetCode's auto-indent to trigger (adjustable)
 
 
 def get_clipboard_content() -> str:
@@ -95,7 +96,7 @@ def human_type_char(char: str, prev_char: Optional[str] = None):
 def type_with_indentation(text: str):
     """
     Type text character-by-character exactly as provided.
-    Handles LeetCode's auto-indentation properly.
+    Handles LeetCode's auto-indentation properly with improved reliability.
     Works for Python, Java, C++, JavaScript, and other languages.
     """
     prev_char = None
@@ -120,23 +121,26 @@ def type_with_indentation(text: str):
             
             # If there's indentation coming, clear LeetCode's auto-indent and type ours
             if indent_count > 0:
-                # Wait for LeetCode to apply auto-indent
-                time.sleep(0.12)
+                # Wait for LeetCode to apply auto-indent (configurable timing)
+                time.sleep(AUTO_INDENT_WAIT)
                 
-                # Clear auto-indentation using Ctrl+A on the line, then retype
-                # Select from current position to start of line
+                # Method 1: Use Shift+Home to select auto-indent
+                # This selects from cursor backwards to line start
                 pyautogui.hotkey('shift', 'home')
-                time.sleep(0.02)
+                time.sleep(0.03)
                 
-                # Delete selection (only whitespace should be selected)
+                # Delete the selected auto-indentation
                 pyautogui.press('backspace')
-                time.sleep(0.02)
+                time.sleep(0.03)
                 
                 # Type our correct indentation
                 pyautogui.write(' ' * indent_count, interval=0.01)
                 
                 # Skip the spaces we just handled
                 i = j
+            else:
+                # No indentation needed, but still wait a bit for stability
+                time.sleep(0.05)
 
 
 def countdown(seconds: int = 3):
@@ -163,6 +167,16 @@ def main():
         if response != 'y':
             print("Cancelled. Use the Mac/Linux version for other operating systems.")
             sys.exit(0)
+    
+    # Ask about timing adjustment for users experiencing issues
+    print("\nTiming Configuration:")
+    print(f"Current auto-indent wait time: {AUTO_INDENT_WAIT}s")
+    adjust = input("Experiencing one-liner issues? Increase delay? (y/n): ").strip().lower()
+    if adjust == 'y':
+        global AUTO_INDENT_WAIT, LINE_BREAK_DELAY
+        AUTO_INDENT_WAIT = 0.25  # Increase for slower systems
+        LINE_BREAK_DELAY = 0.2
+        print("✓ Timing increased for better compatibility!")
     
     # Get content from clipboard
     print("Reading from clipboard...")

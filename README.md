@@ -49,8 +49,10 @@ These are automatically installed by `setup.bat` or `INSTALL_AND_RUN.bat`.
 | `INSTALL_AND_RUN.bat` | One-click installer and launcher |
 | `setup.bat` | Install dependencies only |
 | `run.bat` | Run the application |
+| `FIX_ONE_LINER.bat` | 🔧 Fix for one-liner issue (automatic timing adjustment) |
 | `multilanguage typer.py` | Main Python script |
 | `requirements.txt` | Python dependencies list |
+| `config_slow.txt` | Manual configuration for slower systems |
 
 ## ⚠️ Troubleshooting
 
@@ -64,10 +66,33 @@ These are automatically installed by `setup.bat` or `INSTALL_AND_RUN.bat`.
 - Run Command Prompt as Administrator
 - Manually run: `python -m pip install pyperclip pyautogui`
 
+### Code appears as one line (one-liner issue)
+**This happens when timing is too fast for your system/browser:**
+
+**Solution 1 (Easiest):**
+- When prompted "Experiencing one-liner issues? Increase delay?", type `y`
+- This increases timing automatically
+
+**Solution 2 (Manual):**
+- Open `multilanguage typer.py`
+- Find line ~23: `AUTO_INDENT_WAIT = 0.15`
+- Change to: `AUTO_INDENT_WAIT = 0.25` or `0.3`
+- Save and run again
+
+**Solution 3 (Browser):**
+- Try a different browser (Chrome, Firefox, Edge)
+- Some browsers handle LeetCode's auto-indent differently
+
 ### Code indentation is wrong
 - Make sure you're using the LeetCode editor (not a plain text editor)
 - Clear the editor completely before running the script
 - Ensure your source code has proper indentation
+- Position cursor at the beginning of the editor
+
+### Extra brackets appearing
+- This is now handled automatically
+- If still happening, make sure you're using the latest version
+- Try increasing the delay (see one-liner solution above)
 
 ## 📝 Tips
 
