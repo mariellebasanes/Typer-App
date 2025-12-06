@@ -23,9 +23,23 @@ A Windows-optimized tool that simulates human typing from your clipboard, perfec
 
 1. **Copy your code** to the clipboard (Ctrl+C)
 2. **Run the application** using `run.bat` or `INSTALL_AND_RUN.bat`
-3. **Review the preview** and confirm with `y`
-4. **Switch to your target window** (e.g., LeetCode editor) during the 3-second countdown
-5. **Sit back** and watch the code being typed automatically!
+3. **Select timing mode** (Normal mode recommended, Safe mode if experiencing issues)
+4. **Review the preview** and confirm with `y`
+5. **Switch to your target window** (e.g., LeetCode editor) during the 5-second countdown
+6. **Sit back** and watch the code being typed automatically!
+
+### 📊 Timing Modes Explained
+
+The app offers 4 timing modes to handle different system speeds:
+
+| Mode | Speed | Best For | Use When |
+|------|-------|----------|----------|
+| **Fast** | ⚡ Fastest | Modern PCs, fast browsers | You want maximum speed |
+| **Normal** ⭐ | 🚀 Balanced | Most users (Default) | Works for most setups |
+| **Safe** | 🛡️ Slower | Older systems, slow browsers | Getting one-liner output |
+| **Ultra Safe** | 🐢 Slowest | Maximum compatibility | Other modes fail |
+
+**💡 Tip:** Start with Normal mode. If you see all code on one line (one-liner issue), use Safe or Ultra Safe mode.
 
 ## ✨ Features
 
@@ -49,10 +63,9 @@ These are automatically installed by `setup.bat` or `INSTALL_AND_RUN.bat`.
 | `INSTALL_AND_RUN.bat` | One-click installer and launcher |
 | `setup.bat` | Install dependencies only |
 | `run.bat` | Run the application |
-| `FIX_ONE_LINER.bat` | 🔧 Fix for one-liner issue (automatic timing adjustment) |
-| `multilanguage typer.py` | Main Python script |
+| `multilanguage typer.py` | Main Python script with timing modes |
 | `requirements.txt` | Python dependencies list |
-| `config_slow.txt` | Manual configuration for slower systems |
+| `README.md` | This documentation file |
 
 ## ⚠️ Troubleshooting
 
@@ -66,22 +79,23 @@ These are automatically installed by `setup.bat` or `INSTALL_AND_RUN.bat`.
 - Run Command Prompt as Administrator
 - Manually run: `python -m pip install pyperclip pyautogui`
 
-### Code appears as one line (one-liner issue)
-**This happens when timing is too fast for your system/browser:**
+### ⚡ Code appears as one line (one-liner issue) - MOST COMMON
+**This happens when typing speed is too fast for your system/browser:**
 
-**Solution 1 (Easiest):**
-- When prompted "Experiencing one-liner issues? Increase delay?", type `y`
-- This increases timing automatically
+**Solution 1 (Easiest - Recommended):**
+- When you run the app, select **Safe Mode (3)** or **Ultra Safe Mode (4)**
+- This automatically adjusts all timing for better compatibility
 
-**Solution 2 (Manual):**
+**Solution 2 (Browser optimization):**
+- Close unnecessary browser tabs (improves performance)
+- Try a different browser (Chrome or Edge usually work best)
+- Disable browser extensions temporarily
+- Restart your browser
+
+**Solution 3 (Manual adjustment - Advanced):**
 - Open `multilanguage typer.py`
-- Find line ~23: `AUTO_INDENT_WAIT = 0.15`
-- Change to: `AUTO_INDENT_WAIT = 0.25` or `0.3`
-- Save and run again
-
-**Solution 3 (Browser):**
-- Try a different browser (Chrome, Firefox, Edge)
-- Some browsers handle LeetCode's auto-indent differently
+- Find the `TIMING_PRESETS` section (around line 30)
+- You can create custom timing values if needed
 
 ### Code indentation is wrong
 - Make sure you're using the LeetCode editor (not a plain text editor)
