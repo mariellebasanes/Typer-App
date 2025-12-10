@@ -23,23 +23,9 @@ A Windows-optimized tool that simulates human typing from your clipboard, perfec
 
 1. **Copy your code** to the clipboard (Ctrl+C)
 2. **Run the application** using `run.bat` or `INSTALL_AND_RUN.bat`
-3. **Select timing mode** (Normal mode recommended, Safe mode if experiencing issues)
-4. **Review the preview** and confirm with `y`
-5. **Switch to your target window** (e.g., LeetCode editor) during the 5-second countdown
-6. **Sit back** and watch the code being typed automatically!
-
-### 📊 Timing Modes Explained
-
-The app offers 4 timing modes to handle different system speeds:
-
-| Mode | Speed | Best For | Use When |
-|------|-------|----------|----------|
-| **Fast** | ⚡ Fastest | Modern PCs, fast browsers | You want maximum speed |
-| **Normal** ⭐ | 🚀 Balanced | Most users (Default) | Works for most setups |
-| **Safe** | 🛡️ Slower | Older systems, slow browsers | Getting one-liner output |
-| **Ultra Safe** | 🐢 Slowest | Maximum compatibility | Other modes fail |
-
-**💡 Tip:** Start with Normal mode. If you see all code on one line (one-liner issue), use Safe or Ultra Safe mode.
+3. **Review the preview** and confirm with `y`
+4. **Switch to your target window** (e.g., LeetCode editor) during the 3-second countdown
+5. **Sit back** and watch the code being typed automatically!
 
 ## ✨ Features
 
@@ -63,9 +49,8 @@ These are automatically installed by `setup.bat` or `INSTALL_AND_RUN.bat`.
 | `INSTALL_AND_RUN.bat` | One-click installer and launcher |
 | `setup.bat` | Install dependencies only |
 | `run.bat` | Run the application |
-| `multilanguage typer.py` | Main Python script with timing modes |
+| `multilanguage typer.py` | Main Python script |
 | `requirements.txt` | Python dependencies list |
-| `README.md` | This documentation file |
 
 ## ⚠️ Troubleshooting
 
@@ -79,34 +64,10 @@ These are automatically installed by `setup.bat` or `INSTALL_AND_RUN.bat`.
 - Run Command Prompt as Administrator
 - Manually run: `python -m pip install pyperclip pyautogui`
 
-### ⚡ Code appears as one line (one-liner issue) - MOST COMMON
-**This happens when typing speed is too fast for your system/browser:**
-
-**Solution 1 (Easiest - Recommended):**
-- When you run the app, select **Safe Mode (3)** or **Ultra Safe Mode (4)**
-- This automatically adjusts all timing for better compatibility
-
-**Solution 2 (Browser optimization):**
-- Close unnecessary browser tabs (improves performance)
-- Try a different browser (Chrome or Edge usually work best)
-- Disable browser extensions temporarily
-- Restart your browser
-
-**Solution 3 (Manual adjustment - Advanced):**
-- Open `multilanguage typer.py`
-- Find the `TIMING_PRESETS` section (around line 30)
-- You can create custom timing values if needed
-
 ### Code indentation is wrong
 - Make sure you're using the LeetCode editor (not a plain text editor)
 - Clear the editor completely before running the script
 - Ensure your source code has proper indentation
-- Position cursor at the beginning of the editor
-
-### Extra brackets appearing
-- This is now handled automatically
-- If still happening, make sure you're using the latest version
-- Try increasing the delay (see one-liner solution above)
 
 ## 📝 Tips
 

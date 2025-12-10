@@ -4,6 +4,7 @@ Multi-Language Code Typer - Windows Edition
 Simulates human typing from clipboard
 Perfectly preserves indentation for LeetCode content (Python, Java, C++, etc.)
 Optimized for Windows operating system
+Requires Python 3.7 or higher
 """
 
 import pyperclip
@@ -16,47 +17,11 @@ from typing import Optional
 # Safety: Add a small delay between actions
 pyautogui.PAUSE = 0.01
 
-# Configuration - Default Mode (Fast & Reliable)
-TYPING_SPEED_MIN = 0.05  # Minimum delay between characters (seconds)
-TYPING_SPEED_MAX = 0.15  # Maximum delay between characters (seconds)
-LINE_BREAK_DELAY = 0.15  # Additional delay for line breaks
-INDENT_DELAY = 0.05      # Delay for indentation
-AUTO_INDENT_WAIT = 0.15  # Wait time for LeetCode's auto-indent to trigger
-SHIFT_HOME_DELAY = 0.03  # Delay after Shift+Home selection
-BACKSPACE_DELAY = 0.03   # Delay after backspace
-BRACKET_DELETE_DELAY = 0.02  # Delay for bracket auto-complete deletion
-
-# Timing Presets
-TIMING_PRESETS = {
-    'fast': {
-        'LINE_BREAK_DELAY': 0.12,
-        'AUTO_INDENT_WAIT': 0.12,
-        'SHIFT_HOME_DELAY': 0.02,
-        'BACKSPACE_DELAY': 0.02,
-        'description': 'Fast mode - works on most modern systems'
-    },
-    'normal': {
-        'LINE_BREAK_DELAY': 0.15,
-        'AUTO_INDENT_WAIT': 0.15,
-        'SHIFT_HOME_DELAY': 0.03,
-        'BACKSPACE_DELAY': 0.03,
-        'description': 'Normal mode - balanced speed and reliability (Default)'
-    },
-    'safe': {
-        'LINE_BREAK_DELAY': 0.25,
-        'AUTO_INDENT_WAIT': 0.30,
-        'SHIFT_HOME_DELAY': 0.05,
-        'BACKSPACE_DELAY': 0.05,
-        'description': 'Safe mode - for slower systems or experiencing issues'
-    },
-    'ultra_safe': {
-        'LINE_BREAK_DELAY': 0.35,
-        'AUTO_INDENT_WAIT': 0.40,
-        'SHIFT_HOME_DELAY': 0.08,
-        'BACKSPACE_DELAY': 0.08,
-        'description': 'Ultra Safe mode - maximum reliability, slower typing'
-    }
-}
+# Configuration
+TYPING_SPEED_MIN = 0.01  # Minimum delay between characters (seconds)
+TYPING_SPEED_MAX = 0.03  # Maximum delay between characters (seconds)
+LINE_BREAK_DELAY = 0.06  # Additional delay for line breaks (increased for Java compatibility)
+INDENT_DELAY = 0.01      # Delay for indentation
 
 
 def get_clipboard_content() -> str:
@@ -99,21 +64,19 @@ def human_type_char(char: str, prev_char: Optional[str] = None):
     """
     Type a single character with human-like variation.
     Handles special characters, indentation, and auto-complete properly.
+    NOTE: Newlines are handled in type_with_indentation(), not here.
     """
     # Random delay to simulate human typing
     delay = random.uniform(TYPING_SPEED_MIN, TYPING_SPEED_MAX)
     
-    # Longer delay after punctuation
+    # Slightly longer delay after punctuation
     if prev_char and prev_char in '.,;:!?':
-        delay += random.uniform(0.1, 0.3)
+        delay += random.uniform(0.02, 0.05)
     
     time.sleep(delay)
     
     # Handle special characters
-    if char == '\n':
-        pyautogui.press('enter')
-        time.sleep(LINE_BREAK_DELAY)
-    elif char == '\t':
+    if char == '\t':
         # Convert tabs to spaces (4 spaces)
         pyautogui.write('    ', interval=INDENT_DELAY)
     elif char == ' ':
@@ -124,15 +87,21 @@ def human_type_char(char: str, prev_char: Optional[str] = None):
         
         # LeetCode auto-completes brackets/quotes - delete the auto-completed character
         if char in '{[("\'':
-            time.sleep(BRACKET_DELETE_DELAY)  # Small delay for auto-complete to trigger
+            time.sleep(0.02)  # Small delay for auto-complete to trigger
             pyautogui.press('delete')  # Delete the auto-completed closing bracket
+            # Extra delay after braces for Java (they affect auto-indent)
+            if char == '{':
+                time.sleep(0.01)
 
 
 def type_with_indentation(text: str):
     """
     Type text character-by-character exactly as provided.
-    Handles LeetCode's auto-indentation properly with improved reliability.
+    Handles LeetCode's auto-indentation properly.
     Works for Python, Java, C++, JavaScript, and other languages.
+    STRATEGY: After every Enter, wipe whatever auto-indent exists, then type the
+    exact indentation from the source. Uses a temporary space so the newline
+    itself is never deleted, even when no indent is needed (common in Java).
     """
     prev_char = None
     i = 0
@@ -140,154 +109,121 @@ def type_with_indentation(text: str):
     while i < len(text):
         char = text[i]
         
-        # Type the character
-        human_type_char(char, prev_char)
-        prev_char = char
-        i += 1
-        
-        # After a newline, handle indentation specially
-        if char == '\n' and i < len(text):
-            # Count how many spaces follow the newline (our desired indentation)
+        # Special handling for newlines
+        if char == '\n':
+            # Look ahead to see how many spaces follow
             indent_count = 0
-            j = i
+            j = i + 1
             while j < len(text) and text[j] == ' ':
                 indent_count += 1
                 j += 1
             
-            # If there's indentation coming, clear LeetCode's auto-indent and type ours
+            # Type Enter
+            pyautogui.press('enter')
+            time.sleep(0.08)
+            
+            # Wait for LeetCode/IDE to apply its auto-indent
+            time.sleep(0.12)
+            
+            # Insert a temporary space so we can safely select/backspace
+            pyautogui.press('space')
+            time.sleep(0.01)
+            
+            # Select from cursor back to start of line (auto-indent + temp space)
+            pyautogui.keyDown('shift')
+            time.sleep(0.01)
+            pyautogui.press('home')
+            time.sleep(0.03)
+            pyautogui.keyUp('shift')
+            time.sleep(0.01)
+            
+            # Delete the selection (removes auto-indent, preserves newline)
+            pyautogui.press('backspace')
+            time.sleep(0.04)
+            
+            # Stabilize cursor at column 0
+            time.sleep(0.02)
+            
+            # Now type our correct indentation
             if indent_count > 0:
-                # Wait for LeetCode to apply auto-indent (configurable timing)
-                time.sleep(AUTO_INDENT_WAIT)
-                
-                # Method 1: Use Shift+Home to select auto-indent
-                # This selects from cursor backwards to line start
-                pyautogui.hotkey('shift', 'home')
-                time.sleep(SHIFT_HOME_DELAY)
-                
-                # Delete the selected auto-indentation
-                pyautogui.press('backspace')
-                time.sleep(BACKSPACE_DELAY)
-                
-                # Type our correct indentation
-                pyautogui.write(' ' * indent_count, interval=0.01)
-                
-                # Skip the spaces we just handled
-                i = j
-            else:
-                # No indentation needed, but still wait a bit for stability
-                time.sleep(0.05)
+                for _ in range(indent_count):
+                    pyautogui.press('space')
+                    time.sleep(0.006)
+            
+            # Skip past the newline and spaces we just handled
+            i = j
+            prev_char = ' ' if indent_count > 0 else '\n'
+        else:
+            # Type regular characters normally
+            human_type_char(char, prev_char)
+            prev_char = char
+            i += 1
 
 
-def countdown(seconds: int = 5):
+def countdown(seconds: int = 2):
     """Countdown before starting to type."""
-    print(f"\n⏱️  Starting in {seconds} seconds... Switch to LeetCode editor now!")
+    print(f"Starting in {seconds} seconds...")
     for i in range(seconds, 0, -1):
-        print(f"   {i}...", end=' ', flush=True)
+        print(f"{i}...", end=' ', flush=True)
         time.sleep(1)
-    print("\n\n🚀 Typing started! Do not touch your keyboard or mouse...\n")
-
-
-def apply_timing_preset(preset_name: str):
-    """Apply a timing preset configuration."""
-    global LINE_BREAK_DELAY, AUTO_INDENT_WAIT, SHIFT_HOME_DELAY, BACKSPACE_DELAY
-    
-    preset = TIMING_PRESETS.get(preset_name, TIMING_PRESETS['normal'])
-    LINE_BREAK_DELAY = preset['LINE_BREAK_DELAY']
-    AUTO_INDENT_WAIT = preset['AUTO_INDENT_WAIT']
-    SHIFT_HOME_DELAY = preset['SHIFT_HOME_DELAY']
-    BACKSPACE_DELAY = preset['BACKSPACE_DELAY']
-    
-    print(f"✓ Applied '{preset_name}' mode: {preset['description']}")
+    print("\nTyping started! Switch to your target window now.")
 
 
 def main():
     """Main function."""
-    print("=" * 70)
-    print("  Multi-Language Code Typer - Windows Edition (LeetCode)")
-    print("  Supports: Python, Java, C++, JavaScript, and more")
-    print("=" * 70)
+    print("Multi-Language Code Typer - Windows Edition (LeetCode)")
+    print("Supports: Python, Java, C++, JavaScript, and more")
+    print("=" * 60)
+    
+    # Check Python version
+    import platform
+    python_version = sys.version_info
+    if python_version < (3, 7):
+        print(f"ERROR: Python 3.7 or higher is required.")
+        print(f"Current version: {python_version.major}.{python_version.minor}.{python_version.micro}")
+        sys.exit(1)
     
     # Check if running on Windows
-    import platform
     if platform.system() != 'Windows':
-        print("\n⚠️  WARNING: This script is optimized for Windows.")
+        print("WARNING: This script is optimized for Windows.")
         print(f"Detected OS: {platform.system()}")
         response = input("Continue anyway? (y/n): ").strip().lower()
         if response != 'y':
             print("Cancelled. Use the Mac/Linux version for other operating systems.")
             sys.exit(0)
     
-    # Timing mode selection
-    print("\n📊 TIMING MODE SELECTION")
-    print("-" * 70)
-    print("Choose a mode (especially if you're experiencing one-liner issues):\n")
-    print("  1. Fast Mode     - Works on most modern systems (fastest)")
-    print("  2. Normal Mode   - Balanced speed and reliability (DEFAULT) ⭐")
-    print("  3. Safe Mode     - For slower systems or one-liner issues")
-    print("  4. Ultra Safe    - Maximum reliability (slowest, but most reliable)")
-    print()
-    
-    mode_choice = input("Select mode [1-4] or press Enter for Normal (2): ").strip()
-    
-    mode_map = {
-        '1': 'fast',
-        '2': 'normal',
-        '3': 'safe',
-        '4': 'ultra_safe',
-        '': 'normal'  # Default
-    }
-    
-    selected_mode = mode_map.get(mode_choice, 'normal')
-    apply_timing_preset(selected_mode)
-    print()
-    
     # Get content from clipboard
-    print("📋 Reading from clipboard...")
+    print("Reading from clipboard...")
     content = get_clipboard_content()
     
     # Normalize indentation
     content = normalize_indentation(content)
     
-    print(f"✓ Content loaded successfully!")
-    print(f"   - Length: {len(content)} characters")
-    print(f"   - Lines: {content.count(chr(10)) + 1}")
-    print("\n📄 Preview (first 200 chars):")
-    print("-" * 70)
+    print(f"Content length: {len(content)} characters")
+    print(f"Number of lines: {content.count(chr(10)) + 1}")
+    print("\nPreview (first 200 chars):")
+    print("-" * 50)
     print(content[:200] + ("..." if len(content) > 200 else ""))
-    print("-" * 70)
-    
-    # Important tips
-    print("\n💡 IMPORTANT TIPS:")
-    print("   • Clear your LeetCode editor completely before starting")
-    print("   • Position cursor at the beginning of the editor")
-    print("   • Don't touch keyboard/mouse while typing is in progress")
-    print("   • Press Ctrl+C anytime to stop")
+    print("-" * 50)
     
     # Ask for confirmation
-    response = input("\n▶️  Proceed with typing? (y/n): ").strip().lower()
+    response = input("\nProceed with typing? (y/n): ").strip().lower()
     if response != 'y':
         print("Cancelled.")
         sys.exit(0)
     
     # Countdown
-    countdown(5)
+    countdown(2)
     
     # Type the content
     try:
         type_with_indentation(content)
-        print("\n✅ Typing completed successfully!")
-        print("\nIf the output looks incorrect:")
-        print("   • Try a slower mode (Safe or Ultra Safe)")
-        print("   • Make sure LeetCode editor was completely cleared")
-        print("   • Check your browser performance (close other tabs)")
+        print("\n✓ Typing completed!")
     except KeyboardInterrupt:
-        print("\n\n⚠️  Typing interrupted by user.")
+        print("\n\nTyping interrupted by user.")
         sys.exit(1)
     except Exception as e:
-        print(f"\n\n❌ Error during typing: {e}")
-        print("\nTroubleshooting:")
-        print("   • Try running again with 'Safe Mode' or 'Ultra Safe Mode'")
-        print("   • Ensure Python and dependencies are up to date")
+        print(f"\n\nError during typing: {e}")
         sys.exit(1)
 
 
